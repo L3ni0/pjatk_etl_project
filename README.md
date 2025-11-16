@@ -1,4 +1,5 @@
 # PJATK ETL Project
+![Diagram](/images/Diagram.png)
 
 Projekt ETL (Extract, Transform, Load) stworzony dla PJATK. Projekt wykorzystuje Docker do uruchomienia w izolowanym środowisku, co gwarantuje spójność między róznymi systemami operacyjnymi (Windows, macOS, Linux).
 
