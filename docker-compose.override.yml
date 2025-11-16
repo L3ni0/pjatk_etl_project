@@ -1,0 +1,67 @@
+services:
+  spark-master:
+    image: apache/spark:4.0.1
+    container_name: spark-master
+    networks:
+      - spark-net
+    command: /opt/spark/bin/spark-class org.apache.spark.deploy.master.Master --host spark-master
+    environment:
+      - SPARK_MODE=master
+    ports:
+      - "8090:8080" # Spark Web UI
+      - "7077:7077" # Spark master port
+    volumes:
+      - ${AIRFLOW_PROJ_DIR:-.}/include:/opt/airflow/include
+      - ${AIRFLOW_PROJ_DIR:-.}/spark_jobs:/opt/airflow/spark_jobs
+      - spark-master-work:/opt/spark/work
+    user: "root"
+    privileged: true
+
+  spark-worker-1:
+    image: apache/spark:4.0.1
+    container_name: spark-worker-1
+    command: /opt/spark/bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
+    networks:
+      - spark-net
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_MASTER_URL=spark://spark-master:7077
+      - SPARK_WORKER_CORES=2
+      - SPARK_WORKER_MEMORY=2g
+    volumes:
+      - spark-worker-1-data:/opt/spark/work
+    user: "root"
+    privileged: true
+    depends_on:
+      - spark-master
+    ports:
+      - "8081:8081" # Worker web UI
+
+  spark-worker-2:
+    image: apache/spark:4.0.1
+    container_name: spark-worker-2
+    command: /opt/spark/bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
+    networks:
+      - spark-net
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_MASTER_URL=spark://spark-master:7077
+      - SPARK_WORKER_CORES=2
+      - SPARK_WORKER_MEMORY=2g
+    volumes:
+      - spark-worker-2-data:/opt/spark/work
+    user: "root"
+    privileged: true
+    depends_on:
+      - spark-master
+    ports:
+      - "8082:8081" # Another Worker web UI
+
+networks:
+  spark-net:
+    external: true
+
+volumes:
+  spark-worker-1-data:
+  spark-worker-2-data:
+  spark-master-work:
