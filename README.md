@@ -68,10 +68,13 @@ docker compose up airflow-init
 ### Uruchamianie
 
 ```bash
+# Stwórz sieć
+docker network create spark-net
+
 # Uruchom wszystkie serwisy
 docker-compose up
 
-# Uruchom w tle
+# Albo Uruchom w tle
 docker-compose up -d
 
 # Zatrzymaj serwisy
