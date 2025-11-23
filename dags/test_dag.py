@@ -12,7 +12,7 @@ def test_dag():
 
     test = SparkSubmitOperator(
         task_id="test_dags",
-        application="include/scripts/test.py",
+        application="scripts/spark/test.py",
         conn_id="spark-conn",
     )
 
