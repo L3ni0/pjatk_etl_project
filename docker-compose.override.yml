@@ -1,5 +1,8 @@
 services:
   spark-master:
+    build:
+      context: ./docker/spark
+      dockerfile: Dockerfile
     image: spark_extended:latest
     container_name: spark-master
     networks:
@@ -19,6 +22,9 @@ services:
     privileged: true
 
   spark-worker-1:
+    build:
+      context: ./docker/spark
+      dockerfile: Dockerfile
     image: spark_extended:latest
     container_name: spark-worker-1
     command: /opt/spark/bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
@@ -40,6 +46,9 @@ services:
       - "8081:8081" # Worker web UI
 
   spark-worker-2:
+    build:
+      context: ./docker/spark
+      dockerfile: Dockerfile
     image: spark_extended:latest
     container_name: spark-worker-2
     command: /opt/spark/bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077

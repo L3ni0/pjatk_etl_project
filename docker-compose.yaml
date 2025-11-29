@@ -308,6 +308,28 @@ services:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
+  
+  airflow-init-connections:
+    <<: *airflow-common
+    entrypoint: /bin/bash
+    command:
+      - -c
+      - |
+        airflow connections add 'spark_conn' \
+        --conn-type 'spark' \
+        --conn-host 'spark://spark-master' \
+        --conn-port 7077 \
+        --conn-extra '{
+          "deploy_mode": "cluster",
+          "spark_binary": "spark-submit"
+        }' \
+        || echo "Connection spark_conn already exists"
+    user: "0:0"
+    networks:
+      - spark-net
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
 
 networks:
   spark-net:

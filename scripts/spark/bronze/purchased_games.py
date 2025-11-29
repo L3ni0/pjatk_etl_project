@@ -19,8 +19,8 @@ def read_csv_file(spark: SparkSession ,path:str, schema:StructType) -> DataFrame
         .schema(schema) \
         .csv(path)
     
-    df.withColumn('games', F.from_json(F.col('library'), ArrayType(IntegerType())))
-    df.drop('library')
+    df = df.withColumn('games', F.from_json(F.col('library'), ArrayType(IntegerType())))
+    df = df.drop('library')
 
     return df
 

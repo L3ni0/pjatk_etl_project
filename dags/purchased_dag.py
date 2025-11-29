@@ -15,7 +15,7 @@ def purchased_dag():
     load_data = SparkSubmitOperator(
         task_id="load_purchased_to_bronze",
         application="scripts/spark/bronze/purchased_games.py",
-        conn_id='spark-conn',
+        conn_id='spark_conn',
         packages="org.postgresql:postgresql:42.7.3"
     )
 
