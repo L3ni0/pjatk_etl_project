@@ -77,7 +77,7 @@ x-airflow-common: &airflow-common
     - ${AIRFLOW_PROJ_DIR:-.}/logs:/opt/airflow/logs
     - ${AIRFLOW_PROJ_DIR:-.}/config:/opt/airflow/config
     - ${AIRFLOW_PROJ_DIR:-.}/plugins:/opt/airflow/plugins
-    - ${AIRFLOW_PROJ_DIR:-.}/include:/opt/airflow/include
+    - ${AIRFLOW_PROJ_DIR:-.}/scripts:/opt/airflow/scripts
     - ${AIRFLOW_PROJ_DIR:-.}/data:/opt/airflow/data
   user: "${AIRFLOW_UID:-50000}:0"
   depends_on: &airflow-common-depends-on
@@ -306,6 +306,28 @@ services:
     restart: always
     depends_on:
       <<: *airflow-common-depends-on
+      airflow-init:
+        condition: service_completed_successfully
+  
+  airflow-init-connections:
+    <<: *airflow-common
+    entrypoint: /bin/bash
+    command:
+      - -c
+      - |
+        airflow connections add 'spark_conn' \
+        --conn-type 'spark' \
+        --conn-host 'spark://spark-master' \
+        --conn-port 7077 \
+        --conn-extra '{
+          "deploy_mode": "cluster",
+          "spark_binary": "spark-submit"
+        }' \
+        || echo "Connection spark_conn already exists"
+    user: "0:0"
+    networks:
+      - spark-net
+    depends_on:
       airflow-init:
         condition: service_completed_successfully
 

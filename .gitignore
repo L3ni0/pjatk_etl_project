@@ -3,3 +3,4 @@
 logs
 spark-work
 spark_jobs
+dags/__pycache__
