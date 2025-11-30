@@ -12,7 +12,7 @@ from pyspark.sql.dataframe import DataFrame
 
 def create_spark_session() -> SparkSession:
     spark = (
-        SparkSession.builder.appName("Purchased bronze")
+        SparkSession.builder.appName("Purchased Silver")
         .config("spark.jars.packages", "org.postgresql:postgresql:42.7.3")
         .getOrCreate()
     )
@@ -73,4 +73,3 @@ def main():
 
 
 main()
-
