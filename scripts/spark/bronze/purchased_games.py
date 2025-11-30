@@ -57,10 +57,8 @@ def main():
 
     for platform in ["playstation", "steam", "xbox"]:
         df = read_csv_file(spark, f"data/{platform}/purchased_games.csv", schema=schema)
-        df.show()
         load_to_postgre_db(df, username, password, url, f"purchased_games_{platform}")
 
 
 if __name__ == "__main__":
     main()
-
