@@ -6,7 +6,6 @@ from airflow.models import Variable
 
 @dag(schedule=None, catchup=False)
 def purchased_dag():
-
     # for debug
     start = PythonOperator(
         task_id="test_start", python_callable=lambda: print("Jobs started")
@@ -15,11 +14,19 @@ def purchased_dag():
     load_data = SparkSubmitOperator(
         task_id="load_purchased_to_bronze",
         application="scripts/spark/bronze/purchased_games.py",
-        conn_id='spark_conn',
-        packages="org.postgresql:postgresql:42.7.3"
+        conn_id="spark_conn",
+        packages="org.postgresql:postgresql:42.7.3",
     )
 
-    start  >> load_data
+    clear_data = SparkSubmitOperator(
+        task_id="clear_purchased",
+        application="scripts/spark/silver/purchased_games.py",
+        conn_id="spark_conn",
+        packages="org.postgresql:postgresql:42.7.3",
+    )
+
+    start >> load_data
+    load_data >> clear_data
 
 
 purchased_dag()
