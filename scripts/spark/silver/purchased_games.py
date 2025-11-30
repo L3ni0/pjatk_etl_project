@@ -72,4 +72,5 @@ def main():
     load_to_postgre_db(df_merged, username, password, url, table)
 
 
-main()
+if __name__ == "__main__":
+    main()
