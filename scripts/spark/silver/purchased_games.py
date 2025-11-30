@@ -50,7 +50,7 @@ def load_to_postgre_db(
 def main():
     username = "airflow"
     password = "airflow"
-    url = "jdbc:postgresql://postgre:5432/bronze"  # without airlow: 'jdbc:postgresql://localhost:5432/bronze'
+    url = "jdbc:postgresql://postgres:5432/bronze"  # without airlow: 'jdbc:postgresql://localhost:5432/bronze'
     table = "purchased_games"
     schema = StructType(
         [
