@@ -20,11 +20,16 @@ def create_spark_session() -> SparkSession:
     return spark
 
 
-def read_csv_file(spark: SparkSession, path: str, schema: StructType) -> DataFrame:
-    df = spark.read.options(header=True, delimiter=",").schema(schema).csv(path)
+def read_postgre_table(
+    spark: SparkSession, username: str, password: str, url: str, table: str
+):
+    properties = {
+        "user": username,
+        "password": password,
+        "driver": "org.postgresql.Driver",
+    }
 
-    df = df.withColumn("games", F.from_json(F.col("library"), ArrayType(IntegerType())))
-    df = df.drop("library")
+    df = spark.read.jdbc(url=url, table=table, properties=properties)
 
     return df
 
@@ -46,21 +51,26 @@ def main():
     username = "airflow"
     password = "airflow"
     url = "jdbc:postgresql://postgresql:5432/bronze"  # without airlow: 'jdbc:postgresql://localhost:5432/bronze'
+    table = "purchased_games"
     schema = StructType(
         [
             StructField("player_id", StringType(), False),
-            StructField("library", StringType(), True),
+            StructField("games", ArrayType(IntegerType()), True),
         ]
     )
 
     spark = create_spark_session()
+    df_merged = spark.createDataFrame([], schema=schema)
 
     for platform in ["playstation", "steam", "xbox"]:
-        df = read_csv_file(spark, f"data/{platform}/purchased_games.csv", schema=schema)
-        df.show()
-        load_to_postgre_db(df, username, password, url, f"purchased_games_{platform}")
+        df = read_postgre_table(spark, username, password, url, f"{table}_{platform}")
+        df = df.withColumn(
+            "player_id", F.concat(F.lit(f"{platform[0]}"), F.col("player_id"))
+        )
+        df_merged = df_merged.union(df)
+
+    load_to_postgre_db(df_merged, username, password, url, table)
 
 
-if __name__ == "__main__":
-    main()
+main()
 
