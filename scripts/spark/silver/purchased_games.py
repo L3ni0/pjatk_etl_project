@@ -47,10 +47,15 @@ def load_to_postgre_db(
     return
 
 
+def add_pratform_prefix(df: DataFrame, column: str, prefix: str):
+    df = df.withColumn(column, F.concat(F.lit(prefix), F.col(column)))
+    return df
+
+
 def main():
     username = "airflow"
     password = "airflow"
-    url = "jdbc:postgresql://postgres:5432/bronze"  # without airlow: 'jdbc:postgresql://localhost:5432/bronze'
+    url = "jdbc:postgresql://postgres:5432/silver"  # without airlow: 'jdbc:postgresql://localhost:5432/bronze'
     table = "purchased_games"
     schema = StructType(
         [
@@ -64,9 +69,7 @@ def main():
 
     for platform in ["playstation", "steam", "xbox"]:
         df = read_postgre_table(spark, username, password, url, f"{table}_{platform}")
-        df = df.withColumn(
-            "player_id", F.concat(F.lit(f"{platform[0]}"), F.col("player_id"))
-        )
+        df = add_pratform_prefix(df, "player_id", platform[0])
         df_merged = df_merged.union(df)
 
     load_to_postgre_db(df_merged, username, password, url, table)
