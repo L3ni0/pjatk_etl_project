@@ -55,7 +55,8 @@ def add_pratform_prefix(df: DataFrame, column: str, prefix: str):
 def main():
     username = "airflow"
     password = "airflow"
-    url = "jdbc:postgresql://postgres:5432/silver"  # without airlow: 'jdbc:postgresql://localhost:5432/bronze'
+    url_bronze = "jdbc:postgresql://postgres:5432/bronze"  # without airlow: 'jdbc:postgresql://localhost:5432/bronze'
+    url_silver = "jdbc:postgresql://postgres:5432/silver"
     table = "purchased_games"
     schema = StructType(
         [
@@ -68,11 +69,13 @@ def main():
     df_merged = spark.createDataFrame([], schema=schema)
 
     for platform in ["playstation", "steam", "xbox"]:
-        df = read_postgre_table(spark, username, password, url, f"{table}_{platform}")
+        df = read_postgre_table(
+            spark, username, password, url_bronze, f"{table}_{platform}"
+        )
         df = add_pratform_prefix(df, "player_id", platform[0])
         df_merged = df_merged.union(df)
 
-    load_to_postgre_db(df_merged, username, password, url, table)
+    load_to_postgre_db(df_merged, username, password, url_silver, table)
 
 
 if __name__ == "__main__":
