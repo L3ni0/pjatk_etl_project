@@ -4,34 +4,42 @@ from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOpe
 
 
 @dag(schedule=None, catchup=False)
-def purchased_dag():
+def games_dag():
     # for debug
     start = PythonOperator(
         task_id="test_start", python_callable=lambda: print("Jobs started")
     )
 
-    load_data = SparkSubmitOperator(
+    load_purchases_data = SparkSubmitOperator(
         task_id="load_purchased_to_bronze",
         application="scripts/spark/bronze/purchased_games.py",
         conn_id="spark_conn",
         packages="org.postgresql:postgresql:42.7.3",
     )
 
-    clear_data = SparkSubmitOperator(
+    load_players_data = SparkSubmitOperator(
+        task_id="load_players_to_bronze",
+        application="scripts/spark/bronze/players.py",
+        conn_id="spark_conn",
+        packages="org.postgresql:postgresql:42.7.3",
+    )
+
+    clear_purchases_data = SparkSubmitOperator(
         task_id="clear_purchased",
         application="scripts/spark/silver/purchased_games.py",
         conn_id="spark_conn",
         packages="org.postgresql:postgresql:42.7.3",
     )
 
-    aggregate_data = SparkSubmitOperator(
+    aggregate_purchases_data = SparkSubmitOperator(
         task_id="aggregate_to_purchases",
         application="scripts/spark/gold/purchases.py",
         conn_id="spark_conn",
         packages="org.postgresql:postgresql:42.7.3",
     )
 
-    start >> load_data >> clear_data >> aggregate_data
+    start >> load_purchases_data >> clear_purchases_data >> aggregate_purchases_data
+    start >> load_players_data
 
 
-purchased_dag()
+games_dag()
