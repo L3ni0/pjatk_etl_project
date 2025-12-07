@@ -25,7 +25,7 @@ def purchased_dag():
     )
 
     aggregate_data = SparkSubmitOperator(
-        task_id="aggregate_to_purhases",
+        task_id="aggregate_to_purchases",
         application="scripts/spark/gold/purchases.py",
         conn_id="spark_conn",
         packages="org.postgresql:postgresql:42.7.3",

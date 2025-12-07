@@ -6,7 +6,7 @@ from pyspark.sql.dataframe import DataFrame
 
 def create_spark_session() -> SparkSession:
     spark = (
-        SparkSession.builder.appName("Purchased Silver")
+        SparkSession.builder.appName("Purchases Gold")
         .config("spark.jars.packages", "org.postgresql:postgresql:42.7.3")
         .getOrCreate()
     )
