@@ -1,3 +1,4 @@
+import os
 from pyspark.sql import SparkSession
 from pyspark.sql.types import (
     ArrayType,
@@ -47,14 +48,14 @@ def load_to_postgre_db(
     return
 
 
-def add_pratform_prefix(df: DataFrame, column: str, prefix: str):
+def add_platform_prefix(df: DataFrame, column: str, prefix: str):
     df = df.withColumn(column, F.concat(F.lit(prefix), F.col(column)))
     return df
 
 
 def main():
-    username = "airflow"
-    password = "airflow"
+    username = os.getenv("DB_USERNAME", "airflow")
+    password = os.getenv("DB_PASSWORD", "airflow")
     url_bronze = "jdbc:postgresql://postgres:5432/bronze"  # without airlow: 'jdbc:postgresql://localhost:5432/bronze'
     url_silver = "jdbc:postgresql://postgres:5432/silver"
     table = "purchased_games"
@@ -72,7 +73,7 @@ def main():
         df = read_postgre_table(
             spark, username, password, url_bronze, f"{table}_{platform}"
         )
-        df = add_pratform_prefix(df, "player_id", platform[0])
+        df = add_platform_prefix(df, "player_id", platform[0])
         df_merged = df_merged.union(df)
 
     load_to_postgre_db(df_merged, username, password, url_silver, table)
