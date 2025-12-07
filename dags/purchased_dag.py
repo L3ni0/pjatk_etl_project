@@ -1,7 +1,6 @@
 from airflow.decorators import dag
 from airflow.operators.python import PythonOperator
 from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOperator
-from airflow.models import Variable
 
 
 @dag(schedule=None, catchup=False)
@@ -25,8 +24,14 @@ def purchased_dag():
         packages="org.postgresql:postgresql:42.7.3",
     )
 
-    start >> load_data
-    load_data >> clear_data
+    aggregate_data = SparkSubmitOperator(
+        task_id="aggregate_to_purchases",
+        application="scripts/spark/gold/purchases.py",
+        conn_id="spark_conn",
+        packages="org.postgresql:postgresql:42.7.3",
+    )
+
+    start >> load_data >> clear_data >> aggregate_data
 
 
 purchased_dag()

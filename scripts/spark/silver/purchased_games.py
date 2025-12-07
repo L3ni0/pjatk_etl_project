@@ -56,7 +56,7 @@ def add_platform_prefix(df: DataFrame, column: str, prefix: str):
 def main():
     username = os.getenv("DB_USERNAME", "airflow")
     password = os.getenv("DB_PASSWORD", "airflow")
-    url_bronze = "jdbc:postgresql://postgres:5432/bronze"  # without airlow: 'jdbc:postgresql://localhost:5432/bronze'
+    url_bronze = "jdbc:postgresql://postgres:5432/bronze"  # locally: 'jdbc:postgresql://localhost:5432/silver'
     url_silver = "jdbc:postgresql://postgres:5432/silver"
     table = "purchased_games"
     schema = StructType(
