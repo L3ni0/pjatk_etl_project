@@ -1,7 +1,7 @@
 import os
 from pyspark.sql import SparkSession
 from pyspark.sql.types import (
-    DateType,
+    TimestampNTZType,
     StringType,
     StructField,
     StructType,
@@ -42,17 +42,33 @@ def main():
     username = os.getenv("DB_USERNAME", "airflow")
     password = os.getenv("DB_PASSWORD", "airflow")
     url = "jdbc:postgresql://postgres:5432/bronze"  # locally: 'jdbc:postgresql://localhost:5432/bronze'
-    schema = StructType(
+    schema_playstation = StructType(
         [
             StructField("player_id", StringType(), False),
+            StructField("nickname", StringType(), True),
             StructField("country", StringType(), True),
-            StructField("created_date", DateType(), True),
         ]
     )
 
+    schema_steam = StructType(
+        [
+            StructField("player_id", StringType(), False),
+            StructField("country", StringType(), True),
+            StructField("created_date", TimestampNTZType(), True),
+        ]
+    )
+
+    schema_xbox = StructType(
+        [
+            StructField("player_id", StringType(), False),
+            StructField("nickname", StringType(), True),
+        ]
+    )
+    schemas = (schema_playstation, schema_steam, schema_xbox)
+
     spark = create_spark_session()
 
-    for platform in ["playstation", "steam", "xbox"]:
+    for platform, schema in zip(["playstation", "steam", "xbox"], schemas):
         df = read_csv_file(spark, f"data/{platform}/players.csv", schema=schema)
         load_to_postgre_db(df, username, password, url, f"players_{platform}")
 
