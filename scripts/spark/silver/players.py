@@ -46,8 +46,13 @@ def load_to_postgre_db(
     return
 
 
-def add_platform_prefix(df: DataFrame, column: str, prefix: str):
+def add_platform_prefix(df: DataFrame, column: str, prefix: str) -> DataFrame:
     df = df.withColumn(column, F.concat(F.lit(prefix), F.col(column)))
+    return df
+
+
+def add_platform(df: DataFrame, platform: str) -> DataFrame:
+    df = df.withColumn("platform", F.lit(platform))
     return df
 
 
@@ -61,6 +66,7 @@ def main():
         [
             StructField("player_id", StringType(), False),
             StructField("country", StringType(), True),
+            StructField("platform", StringType(), True),
         ]
     )
 
@@ -72,6 +78,7 @@ def main():
             spark, username, password, url_bronze, f"{table}_{platform}"
         )
         df = add_platform_prefix(df, "player_id", platform[0])
+        df = add_platform(df, platform)
         df_merged = df_merged.unionByName(df, allowMissingColumns=True)
 
     df_merged = df_merged.fillna("Undefined", subset="country")
