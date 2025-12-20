@@ -64,7 +64,7 @@ def main():
             StructField("game_id", StringType(), False),
             StructField("title", StringType(), True),
             StructField("developer", StringType(), True),
-            StructField("publisshers", StringType(), True),
+            StructField("publishers", StringType(), True),
             StructField("genres", StringType(), True),
             StructField("supported_languages", StringType(), True),
             StructField("release_date", DateType(), True),
