@@ -43,6 +43,14 @@ def games_dag():
         conn_id="spark_conn",
         packages="org.postgresql:postgresql:42.7.3",
     )
+
+    clear_games_data = SparkSubmitOperator(
+        task_id="clear_games",
+        application="scripts/spark/silver/games.py",
+        conn_id="spark_conn",
+        packages="org.postgresql:postgresql:42.7.3",
+    )
+
     aggregate_purchases_data = SparkSubmitOperator(
         task_id="aggregate_to_purchases",
         application="scripts/spark/gold/purchases.py",
@@ -59,7 +67,7 @@ def games_dag():
 
     start >> load_purchases_data >> clear_purchases_data >> aggregate_purchases_data
     start >> load_players_data >> clear_players_data >> aggregate_players_data
-    start >> load_games_data
+    start >> load_games_data >> clear_games_data
 
 
 games_dag()
