@@ -69,7 +69,7 @@ def main():
     for platform in ["playstation", "steam", "xbox"]:
         df = read_csv_file(spark, f"data/{platform}/games.csv", schema=schema)
         df = parse_str_to_array(df, "developer")
-        df = parse_str_to_array(df, "publisshers")
+        df = parse_str_to_array(df, "publishers")
         df = parse_str_to_array(df, "genres")
         df = parse_str_to_array(df, "supported_languages")
         load_to_postgre_db(df, username, password, url, f"games_{platform}")
