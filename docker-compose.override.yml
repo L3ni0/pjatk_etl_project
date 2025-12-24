@@ -3,7 +3,7 @@ services:
     build:
       context: ./docker/spark
       dockerfile: Dockerfile
-    image: spark_extended:latest
+    # image: spark_extended:latest
     container_name: spark-master
     networks:
       - spark-net
@@ -16,7 +16,7 @@ services:
     volumes:
       - ${AIRFLOW_PROJ_DIR:-.}/include:/opt/airflow/include
       - ${AIRFLOW_PROJ_DIR:-.}/spark_jobs:/opt/airflow/spark_jobs
-      - ${AIRFLOW_PROJ_DIR:-.}/data:/opt/airflow/data  
+      - ${AIRFLOW_PROJ_DIR:-.}/data:/opt/airflow/data
       - spark-master-work:/opt/spark/work
     user: "root"
     privileged: true
@@ -25,7 +25,7 @@ services:
     build:
       context: ./docker/spark
       dockerfile: Dockerfile
-    image: spark_extended:latest
+    # image: spark_extended:latest
     container_name: spark-worker-1
     command: /opt/spark/bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
     networks:
@@ -37,7 +37,7 @@ services:
       - SPARK_WORKER_MEMORY=2g
     volumes:
       - spark-worker-1-data:/opt/spark/work
-      - ${AIRFLOW_PROJ_DIR:-.}/data:/opt/airflow/data  
+      - ${AIRFLOW_PROJ_DIR:-.}/data:/opt/airflow/data
     user: "root"
     privileged: true
     depends_on:
@@ -49,7 +49,7 @@ services:
     build:
       context: ./docker/spark
       dockerfile: Dockerfile
-    image: spark_extended:latest
+    # image: spark_extended:latest
     container_name: spark-worker-2
     command: /opt/spark/bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
     networks:
@@ -61,7 +61,7 @@ services:
       - SPARK_WORKER_MEMORY=2g
     volumes:
       - spark-worker-2-data:/opt/spark/work
-      - ${AIRFLOW_PROJ_DIR:-.}/data:/opt/airflow/data  
+      - ${AIRFLOW_PROJ_DIR:-.}/data:/opt/airflow/data
     user: "root"
     privileged: true
     depends_on:
