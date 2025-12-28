@@ -71,9 +71,15 @@ def games_dag():
         conn_id="spark_conn",
         packages="org.postgresql:postgresql:42.7.3",
     )
+    aggregate_genres_data = SparkSubmitOperator(
+        task_id="aggregate_to_genres",
+        application="scripts/spark/gold/genres.py",
+        conn_id="spark_conn",
+        packages="org.postgresql:postgresql:42.7.3",
+    )
     start >> load_purchases_data >> clear_purchases_data >> aggregate_purchases_data
     start >> load_players_data >> clear_players_data >> aggregate_players_data
-    start >> load_games_data >> clear_games_data >> aggregate_games_data
+    start >> load_games_data >> clear_games_data >> [aggregate_games_data, aggregate_genres_data]  # fmt: off
 
 
 games_dag()
