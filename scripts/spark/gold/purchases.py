@@ -67,6 +67,15 @@ def separate_games(df: DataFrame, col: str, explode_name: str) -> DataFrame:
     return df
 
 
+def assign_date_ids(df: DataFrame, range_max: int = 337) -> DataFrame:
+    
+    df = df.withColumn(
+        "date_id", 
+        ((F.col("purchases_id") % range_max) + 1).cast("int")
+    )
+    
+    return df
+
 def main():
     # params
     username = os.getenv("DB_USERNAME", "airflow")
@@ -82,6 +91,7 @@ def main():
     df = separate_games(df, "games", "game_id")
     df = df.drop("games")
     df = generate_table_id(df, "purchases_id")
+    df = assign_date_ids(df, 337)
     df = df.repartition(1000, "purchases_id")
 
     load_to_postgre_db(df, username, password, url_gold, table_gold)
