@@ -53,6 +53,11 @@ def add_platform_prefix(df: DataFrame, column: str, prefix: str):
     return df
 
 
+def add_platform_column(df: DataFrame, column: str, name: str):
+    df = df.withColumn(column, F.lit(name))
+    return df
+
+
 def main():
     username = os.getenv("DB_USERNAME", "airflow")
     password = os.getenv("DB_PASSWORD", "airflow")
@@ -63,6 +68,7 @@ def main():
         [
             StructField("game_id", StringType(), False),
             StructField("title", StringType(), True),
+            StructField("platform", StringType(), True),
             StructField("developer", ArrayType(StringType()), True),
             StructField("publishers", ArrayType(StringType()), True),
             StructField("genres", ArrayType(StringType()), True),
@@ -78,7 +84,10 @@ def main():
             spark, username, password, url_bronze, f"{table}_{platform}"
         )
         # df = add_platform_prefix(df, "player_id", platform[0])
-        df_merged = df_merged.union(df)
+        if platform != "playstation":
+            df = add_platform_column(df, "platform", platform)
+        print(df.schema)
+        df_merged = df_merged.unionByName(df)
 
     load_to_postgre_db(df_merged, username, password, url_silver, table)
 

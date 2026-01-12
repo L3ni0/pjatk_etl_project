@@ -50,7 +50,7 @@ def main():
     spark = create_spark_session()
 
     df = read_postgre_table(spark, username, password, url_silver, table)
-    df = df.select("game_id", "publishers")
+    df = df.select("game_id", "publishers", "title")
     load_to_postgre_db(df, username, password, url_gold, table)
 
 

@@ -1,4 +1,5 @@
 import os
+from re import escape
 from pyspark.sql import SparkSession
 from pyspark.sql.types import (
     ArrayType,
@@ -22,7 +23,11 @@ def create_spark_session() -> SparkSession:
 
 
 def read_csv_file(spark: SparkSession, path: str, schema: StructType) -> DataFrame:
-    df = spark.read.options(header=True, delimiter=",").schema(schema).csv(path)
+    df = (
+        spark.read.options(header=True, delimiter=",", quote='"', escape='"')
+        .schema(schema)
+        .csv(path)
+    )
 
     return df
 
@@ -43,7 +48,12 @@ def load_to_postgre_db(
         "password": password,
         "driver": "org.postgresql.Driver",
     }
-    df.write.jdbc(url=url, table=table, mode="overwrite", properties=properties)
+    df.write.option("overwriteSchema", "true").jdbc(
+        url=url,
+        table=table,
+        mode="overwrite",
+        properties=properties,
+    )
 
     return
 
@@ -52,7 +62,7 @@ def main():
     username = os.getenv("DB_USERNAME", "airflow")
     password = os.getenv("DB_PASSWORD", "airflow")
     url = "jdbc:postgresql://postgres:5432/bronze"  # locally: 'jdbc:postgresql://localhost:5432/bronze'
-    schema = StructType(
+    schema_steam = StructType(
         [
             StructField("game_id", StringType(), False),
             StructField("title", StringType(), True),
@@ -63,10 +73,33 @@ def main():
             StructField("release_date", DateType(), True),
         ]
     )
-
+    schema_playstation = StructType(
+        [
+            StructField("game_id", StringType(), False),
+            StructField("title", StringType(), True),
+            StructField("platform", StringType(), True),
+            StructField("developer", StringType(), True),
+            StructField("publishers", StringType(), True),
+            StructField("genres", StringType(), True),
+            StructField("supported_languages", StringType(), True),
+            StructField("release_date", DateType(), True),
+        ]
+    )
+    schema_xbox = StructType(
+        [
+            StructField("game_id", StringType(), False),
+            StructField("title", StringType(), True),
+            StructField("developer", StringType(), True),
+            StructField("publishers", StringType(), True),
+            StructField("genres", StringType(), True),
+            StructField("supported_languages", StringType(), True),
+            StructField("release_date", DateType(), True),
+        ]
+    )
+    schemas = (schema_playstation, schema_steam, schema_xbox)
     spark = create_spark_session()
 
-    for platform in ["playstation", "steam", "xbox"]:
+    for platform, schema in zip(("playstation", "steam", "xbox"), schemas):
         df = read_csv_file(spark, f"data/{platform}/games.csv", schema=schema)
         df = parse_str_to_array(df, "developer")
         df = parse_str_to_array(df, "publishers")
